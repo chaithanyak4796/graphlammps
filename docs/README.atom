@@ -1,0 +1,32 @@
+This class is meant to represent a single atom and contains various properties such as:
+
+pos : (numpy float array of shape (3,) ) *_np.zeros((3,), dtype=float)_*
+    : A 1D array which stores the position of the atom.
+
+vel : (numpy float array of shape (3,) ) *_np.zeros((3,), dtype=float)_*
+    : A	1D array which stores the velocity of the atom.
+
+type : (int)
+     : Atom type (as defined by LAMMPS)
+
+name : str
+     : Atom element name identifier
+
+idx  : (int)
+     : Atom index
+
+mass : (float)
+     : Atom mass (grams/mole)
+
+q    : float  *_0_*
+     : Atom charge
+
+corner : (bool) True/*_False_*
+       : Is the atom a corner lattice atom?
+
+layer  : (int) *_0_*
+       : Which graphene layer does the atom belong to? The bottom layer has the index 0.
+
+lattice : (bool) *_True*/False
+	: Is the atom a part of the lattice?
+	

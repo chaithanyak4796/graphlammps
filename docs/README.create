@@ -1,0 +1,74 @@
+This class contains the functions required to build the system and write the necessary structure files. The options available (variables and the functions) are specified below.
+
+**************************************** Variables *********************************************
+
+##############################
+The syntax of the variable documentation is as follows:
+* variable_name : (data_type) values
+The default values are enclosed within *__*
+##############################
+
+* is_graphene : (bool) *_True_*/False
+	      This boolean variable determines if the lattice is a single graphene sheet or a graphite (AB-AB) stacking.
+
+* lat_a       : (float) *_1.42_*
+              : The lattice constant a in Angstroms. This can be overriden if the the variable use_lat_file is set to TRUE
+
+* lat_c	      :	(float)	*_3.35_*
+      	      :	The lattice constant c in Angstroms. This can be overriden if the the variable use_lat_file is set to TRUE
+
+* num_rep     : (numpy float array of shape (3,) ) *_np.array([10,10,2],dtype=int)_*
+  	      : The number of times the unit cell is to be repeated in the x, y and z directions respectively.
+
+* vac_height  : ( numpy float array of size (2,) ) *_np.array([10.0, 120.0], dtype=float_*
+  	      : The vaccum height below (vac_height[0]) and above (vac_height[1]) the lattice to emulate surface. Set both to zero if simulating bulk graphite.
+
+* ortho_box   : (bool) True/*_False_*
+  	      : Use the orhtogonal or non-orthogonal basis for the lattice. Currently only non-ortho basis is supported.
+
+* use_lat_file : (bool) *_True_*/False
+  	       : There are two options to give the lattice constants. If this variable is set to False, the above-mentioned lat_a and the lat_c variables are used to define the lattice constants. If this variable is True, the lattice constants are read from a file. This can be useful if we want to pre-calculate the temperature dependent lattice constants for a given interaction potential (IP) in case we want to avoid NPT ensemble in our MD simulations.
+
+* Lat_file     : (string) *_params.Lat_const_file_*
+  	       : The file containing the temperature dependent lattice constants for thew various IPs. The params is another class which contains certain default parameters. Refer to its documentation for more info about that class.
+
+* Lat_Temp     : (int) *_300_*
+  	       : The lattice temperature in K. Necessary for reading the temperature dependent lattice constants from file and creating the gaussian velocities for the lattice atoms. If the lattice constants are being read from the file, this class looks in the file to see if the parameters are available for Lat_Temp. In case the parameters are not available, it will use the available data to linearly interpolate from the neqrest availabe temperatures.
+
+* mark_corner  : (bool) *_True_*/False
+  	       : If set to true, the corner atoms of all the graphene layers will be marked with a diiferent atom_type. This is useful in cases where we want to keep the corner atoms fixed in our MD simulations.
+
+* mark_all_layers : (bool) True/*_False_*
+  		  : If set to true, each individual graphene layer is assigned a new atom type. Useful in cases where want layer by layer information.
+
+* mark_top_layer : (bool) True/*_False_*
+  		 : If set to true, only the top graphene layer is assigned a separate atom type.
+
+* struc_fname_prefix : (string) *_./graphite_slab_*
+  		     : The prefix for the structure file names.
+
+* write_lmp          : (bool) *_True_*/False
+  		     : Write the structure file in the .lmp file format? This format can be read by LAMMPS using the read_data command
+
+* write_xyz          : (bool) *_True_*/False
+                     : Write the structure file	in the .xyz file format? This format can be read by many visualiztion softwares including xcrysden, Paraview, OVITO etc.
+
+
+**************************************** Functions *********************************************
+##################################
+The syntax of the documentation for the functions is described here.
+* return (if any) =  function_name(*args)
+##################################
+
+* system = create_system(IP='reaxFF-CHO', lat_a = 1.42, lat_c = 3.35)
+
+    This function is to be invoked from the script to generate the structure positions once all the class variables are adequately specified. The only input argument is the interaction potential IP and is optional. This is required if use_lat_file == True. For a list of available IPs refer to the variable available_IPs in this class. This function creates an instance of the lmp_system class and populates it with the lattice atoms based on the combination of class variables provided. For the lattice atoms, only the positions are generated here and the velocities are handled by a diiferent function generate_velocities_lattice() described later. The class returns the instance of the lmp_system class.
+
+* generate_velocities_lattice(system)
+
+    This function generates the velocities of the lattice atoms in the system (instance of the lmp_system class). The velocities are sampled from a gaussian distribution at the temperature specified by the Lat_Temp variable. The velocities are generated layer by layer ensureing that the cenrter of mass velocity of each layer is zero. The velocities of all the atoms are then finally adjusted to ensure the center of mass of the entire system has a velocity of zero. Finally, the velocities are adjusted again to comply with the units consistent with the LAMMPS units (real, metal) for the specified IP.
+
+* write_velocities(system)
+
+    This function appends the velocities for all the atoms to the previously generated .lmp structure files. Therefore this function raises an error when it cannot open the expected .lmp file.
+

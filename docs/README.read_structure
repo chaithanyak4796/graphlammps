@@ -1,0 +1,19 @@
+This class contains functions necessary for reading the various types of structure files and are primarily meant for post-processing.
+
+*NOTE : Cuurently only supports the LAMMPS dump format. Will add support for .xyz later
+
+***************** Variables ************************
+
+* num_timesteps : (int) 1
+  		: Number of timesteps in file
+
+* fname 	: (string)
+  		: Name of the file to be read.
+
+* cols		: (list)
+  		: A list containing the mapping of the columns to be read in the output file.
+
+***************** Functions ************************
+* system = read_time_step_dump()
+
+    This function reads the system information at the next time step. It creates and returns an instance of the system.

@@ -1,0 +1,8 @@
+This module contains some public variables.
+
+* Lib_dir  : Source directory where the library is present.
+* Data_dir : Directory where the data files are present.
+* Lat_const_file : The file containing the temperature dependent lattice constatnts.
+* mass_X   : mass of atom 'X' in g/mol
+* kb       : Boltzmann constant in eV/K
+* NA       : Avagadro's number

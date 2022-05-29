@@ -1,0 +1,10 @@
+This class contains the conrenrts necessary to describe a LAMMPS system. This class is general enough to be used for both pre and post processing.
+
+********************************* Variables **************************
+
+* name   : string
+  	 : The name of the system.
+
+* atoms_list : (list)
+  	     : A list of instances of the atom class.
+

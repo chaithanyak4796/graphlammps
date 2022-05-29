@@ -1,0 +1,5 @@
+build/
+dist/
+graphlammps.egg-info/
+tests/
+./graphlammps/__pycache__/
