@@ -18,3 +18,5 @@ class lmp_system:
     def __init__(self, name='general'):
         self.name = name
         self.atoms_list = []
+
+    
