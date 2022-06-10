@@ -9,6 +9,7 @@ Created on Fri May 27 11:34:43 2022
 import numpy as np
 import sys
 import subprocess
+import os
 
 from graphlammps import lmp_system, atom
 
@@ -28,6 +29,8 @@ class read_structure:
         
         if(self.cols != self.default_cols):
             sys.exit("The column mapping provided is currently not supported.")
+            
+        self.use_cache = True    # Use cache or not?
         
         if(".dump" in self.fname):
             self.read_next_timestep   = self.read_dump_next_timestep
@@ -43,57 +46,70 @@ class read_structure:
             print(" Unable to open file : ", self.fname)
             sys.exit(1)
         
-        # # Find the total number of time steps in the dump file
-        # cmd = ["grep", "TIMESTEP", self.fname]
-        # res = subprocess.run(cmd, stdout = subprocess.PIPE)
-        # self.num_timesteps = len(res.stdout)//len('ITEM: TIMESTEP\n')
-        
-        # print("Total number of timesteps in file = ", self.num_timesteps)
-        
-        
-        # # Create a mapping between the timestep and the line numbers
-        # cmd = ["grep", "-n", "Timestep", self.fname]
-        # res = subprocess.run(cmd, stdout = subprocess.PIPE).stdout.decode()
-        # res = res.split('\n')[:-1]
-        # # print(res)
-        # self.num_timesteps = len(res)
-        
-        # self.line_map = np.zeros((self.num_timesteps,2), dtype=int)
-        
-        # for i in range(self.num_timesteps):
-        #     line     = res[i].split()
-        #     line_no  = line[0].split(':')
-        #     line_no  = int(line_no[0])
-        #     timestep = int(line[-1])
-            
-        #     self.line_map[i][0], self.line_map[i][1] = timestep, line_no
-        
         # Create the position of file pointers necessary to jump around
         self.line_offset = []
         offset = 0
         
-        with open(self.fname) as fr:
-            for line in fr:
-                offset_beg = offset
-                offset += len(line)
+        if(self.use_cache):
+            cache_struc_fname = self.fname + ".cache" 
+            cache_exist       = os.path.isfile(cache_struc_fname)
+            
+            if not cache_exist:
+                write_cache = True
+                print("Dump cache does not exist. Will write new cache.")
+            else:
+                write_cache = False
+                fc = open(cache_struc_fname, "r+")
+                file_fname = fc.readline()
+                file_mtime = fc.readline()
+                mtime = "%s"%(os.path.getmtime(self.fname))
+                if (file_fname.strip() != self.fname.strip() or file_mtime.strip() != mtime.strip() ):
+                    write_cache = True
+                    print(" Dump cache exists, but is outdated. Will write new cache.")
+                    print(file_fname.strip(),self.fname.strip())
+                    print(file_mtime.strip(),mtime.strip())
+                else:
+                    print("Dump cache exists and is up to date. Will read the cache.")
+                    self.num_timesteps = int(fc.readline())
+                    for i in range(self.num_timesteps):
+                        line = fc.readline().split()
+                        self.line_offset.append([int(line[0]), int(line[1])])
+                fc.close()
         
-                if("TIMESTEP" in line.split()):
-                    line = fr.readline()
+        if ((self.use_cache == False) or (self.use_cache and write_cache)):
+            with open(self.fname) as fr:
+                for line in fr:
+                    offset_beg = offset
                     offset += len(line)
-                    ts = int(line)
-        
-                    self.line_offset.append([ts, offset_beg])
-                    
-                    line = fr.readline()
-                    offset += len(line)
-                    
-                    line = fr.readline()
-                    offset += len(line)
-                    natoms = int(line)
-                    
-                    for i in range(natoms+5):
+            
+                    if("TIMESTEP" in line.split()):
                         line = fr.readline()
                         offset += len(line)
+                        ts = int(line)
+            
+                        self.line_offset.append([ts, offset_beg])
+                        
+                        line = fr.readline()
+                        offset += len(line)
+                        
+                        line = fr.readline()
+                        offset += len(line)
+                        natoms = int(line)
+                        
+                        for i in range(natoms+5):
+                            line = fr.readline()
+                            offset += len(line)
+                            
+        if self.use_cache and write_cache:
+            print("Writing cache for the dump file.")
+            fc = open(cache_struc_fname, "w")
+            fc.write("%s\n"%(self.fname))
+            mtime = os.path.getmtime(self.fname)
+            fc.write("%s\n"%(mtime))
+            fc.write("%d\n"%(len(self.line_offset)))
+            for i in range(len(self.line_offset)):
+                fc.write("%d %d\n"%(self.line_offset[i][0], self.line_offset[i][1]))
+            fc.close()
 
         self.fr.seek(0)
         self.line_offset   = np.array(self.line_offset)
@@ -108,7 +124,7 @@ class read_structure:
         idx = np.where(self.line_offset[:,0] == step)[0]
         
         if (len(idx) == 0):
-            sys.exit("Time step not found in bonds file.")
+            sys.exit("Time step not found in structure file.")
         else:
             idx = idx[0]
             

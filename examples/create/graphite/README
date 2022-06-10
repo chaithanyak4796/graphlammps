@@ -1,0 +1,4 @@
+This is an example script to create a pristine graphite sheet with user defined lattice constants.
+
+- create_graphite.py : Python script that utilizes the library to create the structure files.
+- graphite_slab.*    : Sample structure files generated 

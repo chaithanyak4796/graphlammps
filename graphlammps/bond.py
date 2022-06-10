@@ -9,6 +9,7 @@ Created on Sun Jun  5 15:51:56 2022
 import numpy as np
 import sys
 import subprocess
+import os
 
 class bond_info:
     def __init__(self):
@@ -27,49 +28,92 @@ class bonds:
         self.fname = fname
         self.dt    = dt
         
+        self.use_cache = True    # Use cache or not?
+        
         try:
             self.fr = open(fname, "r")
         except:
             sys.exit(f"Unable to open file {self.fname}. \nExiting.")
-        
-        # Create a mapping between the timestep and the line numbers
-        cmd = ["grep", "-n", "Timestep", self.fname]
-        res = subprocess.run(cmd, stdout = subprocess.PIPE).stdout.decode()
-        res = res.split('\n')[:-1]
-        # print(res)
-        self.num_timesteps = len(res)
-        
-        self.line_map = np.zeros((self.num_timesteps,2), dtype=int)
-        
-        for i in range(self.num_timesteps):
-            line     = res[i].split()
-            line_no  = line[0].split(':')
-            line_no  = int(line_no[0])
-            timestep = int(line[-1])
             
-            self.line_map[i][0], self.line_map[i][1] = timestep, line_no
-        
         # Create the position of file pointers necessary to jump around
         self.line_offset = []
         offset = 0
         
-        for line in self.fr:
-            self.line_offset.append(offset)
-            offset += len(line)
+        if(self.use_cache):
+            cache_bonds_fname = self.fname + ".cache" 
+            cache_exist       = os.path.isfile(cache_bonds_fname)
+            
+            if not cache_exist:
+                write_cache = True
+                print("Bonds cache does not exist. Will write new cache.")
+            else:
+                write_cache = False
+                fc = open(cache_bonds_fname, "r+")
+                file_fname = fc.readline()
+                file_mtime = fc.readline()
+                mtime = "%s"%(os.path.getmtime(self.fname))
+                if (file_fname.strip() != self.fname.strip() or file_mtime.strip() != mtime.strip() ):
+                    write_cache = True
+                    print("Bonds cache exists, but is outdated. Will write new cache.")
+                    print(file_fname.strip(),self.fname.strip())
+                    print(file_mtime.strip(),mtime.strip())
+                else:
+                    print("Bonds cache exists and is up to date. Will read the cache.")
+                    self.num_timesteps = int(fc.readline())
+                    for i in range(self.num_timesteps):
+                        line = fc.readline().split()
+                        self.line_offset.append([int(line[0]), int(line[1])])
+                fc.close()
+            
+        if ((self.use_cache == False) or (self.use_cache and write_cache)):       
+            with open(self.fname) as fr:
+                for line in fr:
+                    offset_beg = offset
+                    if("Timestep" in line.split()):
+                        ts      = int(line.split()[-1])
+                        offset += len(line)
+                        
+                        self.line_offset.append([ts, offset_beg])
+                        
+                        line    = fr.readline()
+                        offset += len(line)
+                        line    = fr.readline()
+                        natoms  = int(line.split()[-1])
+                        offset += len(line)
+                        
+                        for i in range(natoms+5):
+                            line    = fr.readline()
+                            offset += len(line)
+                    else:
+                        sys.exit("Error while mapping the bonds file. Timestep not found at the expected location in the bonds file. !!!!!")
+        
+        if self.use_cache and write_cache:
+            print("Writing cache for the bonds file.")
+            fc = open(cache_bonds_fname, "w")
+            fc.write("%s\n"%(self.fname))
+            mtime = os.path.getmtime(self.fname)
+            fc.write("%s\n"%(mtime))
+            fc.write("%d\n"%(len(self.line_offset)))
+            for i in range(len(self.line_offset)):
+                fc.write("%d %d\n"%(self.line_offset[i][0], self.line_offset[i][1]))
+            fc.close()
+            
         self.fr.seek(0)
+        self.line_offset   = np.array(self.line_offset)
+        self.num_timesteps = len(self.line_offset)
         
     def read_bonds_timestep(self, step):
-        # Check if the index is valid
-        idx = np.where(self.line_map[:,0] == step)[0]
+        
+        # Check if the step is valid
+        idx = np.where(self.line_offset[:,0] == step)[0]
         
         if (len(idx) == 0):
             sys.exit("Time step not found in bonds file.")
         else:
             idx = idx[0]
-           
+            
         # Get the file pointer to move to the appropriate location
-        line_no = self.line_map[idx][1] - 1
-        self.fr.seek(self.line_offset[line_no])
+        self.fr.seek(self.line_offset[idx][1])
         
         # Read the bonds information 
         self.read_bonds_info()
