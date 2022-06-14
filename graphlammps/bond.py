@@ -116,9 +116,9 @@ class bonds:
         self.fr.seek(self.line_offset[idx][1])
         
         # Read the bonds information 
-        self.read_bonds_info()
+        self.__read_bonds_info()
         
-    def read_bonds_info(self):
+    def __read_bonds_info(self):
         """ This function assumes the file pointer is at the begining of a timestep and reads the bonds information """
         line = self.fr.readline()
         # print(line)
@@ -162,8 +162,11 @@ class bonds:
                 
             line = self.fr.readline()
             
+            # Sort the bonds list based on the id attribute
+            self.bonds_list.sort(key=lambda x: x.id)
+            
     def read_next_timestep(self):
-        self.read_bonds_info()
+        self.__read_bonds_info()
         
     def close(self):
         self.fr.close()
@@ -172,11 +175,14 @@ class bonds:
         num_atoms = len(self.bonds_list)
         O_atoms   = []
         O2_idx    = []
+        
+        ## Create a list of atoms with exactly one neighbor
         for i in range(num_atoms):
             b = self.bonds_list[i]
             if(b.type == O_type and b.nb == 1):
                 O_atoms.append(i)
-        
+                
+        # Go through the list and find the O atoms comprising the molecule
         for i in range(len(O_atoms)):
             Oa = self.bonds_list[int(O_atoms[i])]
             for j in range(i+1, len(O_atoms)):
