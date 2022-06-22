@@ -190,6 +190,7 @@ class bonds:
                 if (Oa.id in Ob.id_nb):
                     temp = [Oa.id, Ob.id]
                     O2_idx.append([min(temp), max(temp)])
+                    break
         
         # print("%d O2 molecules found at timestep %d"%(len(O2_idx), self.timestep))
         return O2_idx

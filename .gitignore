@@ -2,4 +2,4 @@ build/
 dist/
 graphlammps.egg-info/
 tests/
-graphlammps/__pycache__/
+__pycache__/

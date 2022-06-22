@@ -71,57 +71,32 @@ class create:
         
         idx = 1
         
-        for i in range(num_rep[0]):
-            for j in range(num_rep[1]):
-                for k in range(num_rep[2]):
-                    base_lattice[0] = i*lattice_vec[0][0] + j*lattice_vec[1][0] + k*lattice_vec[2][0]
-                    base_lattice[1] = i*lattice_vec[0][1] + j*lattice_vec[1][1] + k*lattice_vec[2][1]
-                    base_lattice[2] = i*lattice_vec[0][2] + j*lattice_vec[1][2] + k*lattice_vec[2][2]
-                    
-                    pos = np.copy(base_lattice)
-                    atom_type = 2*k + 1
-                    system.atoms_list.append(atom.atom(mass_C, idx, atom_type,'C'))
-                    system.atoms_list[-1].pos     = np.copy(pos)
-                    system.atoms_list[-1].vel     = np.copy(vel)
-                    system.atoms_list[-1].layer   = 2*k
-                    system.atoms_list[-1].lattice = True
-                             
-                    pos[0] = base_lattice[0] + 0.5*self.lat_a
-                    pos[1] = base_lattice[1] + (0.5/3**0.5) * self.lat_a
-                    pos[2] = base_lattice[2] + 0
- 
-                    system.atoms_list.append(atom.atom(mass_C, idx+1, atom_type,'C'))
-                    system.atoms_list[-1].pos     = np.copy(pos)
-                    system.atoms_list[-1].vel     = np.copy(vel)
-                    system.atoms_list[-1].layer   = 2*k 
-                    system.atoms_list[-1].lattice = True
-                    
-                    if self.mark_corner:
-                        if  (i == 0             and j == 0           ): system.atoms_list[-2].corner = True
-                        elif(i == 0             and j == num_rep[1]-1): system.atoms_list[-1].corner = True
-                        elif(i == num_rep[0] -1 and j == 0           ): system.atoms_list[-2].corner = True
-                        elif(i == num_rep[0] -1 and j == num_rep[1]-1): system.atoms_list[-1].corner = True
+        if not self.ortho_box:   # Non-orthogonal box
+            for i in range(num_rep[0]):
+                for j in range(num_rep[1]):
+                    for k in range(num_rep[2]):
+                        base_lattice[0] = i*lattice_vec[0][0] + j*lattice_vec[1][0] + k*lattice_vec[2][0]
+                        base_lattice[1] = i*lattice_vec[0][1] + j*lattice_vec[1][1] + k*lattice_vec[2][1]
+                        base_lattice[2] = i*lattice_vec[0][2] + j*lattice_vec[1][2] + k*lattice_vec[2][2]
                         
-                    if not self.is_graphene:
-                        pos[0] = base_lattice[0] + 0.5*self.lat_a
-                        pos[1] = base_lattice[1] + (0.5/3.0**0.5) * self.lat_a
-                        pos[2] = base_lattice[2] + 0.5*self.lat_c
-
-                        atom_type = 2*k + 2
-                        system.atoms_list.append(atom.atom(mass_C, idx+2, atom_type,'C'))
+                        pos = np.copy(base_lattice) 
+                        
+                        atom_type = 2*k + 1
+                        system.atoms_list.append(atom.atom(mass_C, idx, atom_type,'C'))
                         system.atoms_list[-1].pos     = np.copy(pos)
                         system.atoms_list[-1].vel     = np.copy(vel)
-                        system.atoms_list[-1].layer   = 2*k + 1
+                        system.atoms_list[-1].layer   = 2*k
                         system.atoms_list[-1].lattice = True
-                    
-                        pos[0] = base_lattice[0] + 1.0*self.lat_a
-                        pos[1] = base_lattice[1] + (1.0/3.0**0.5) * self.lat_a
-                        pos[2] = base_lattice[2] + 0.5*self.lat_c
+                                 
+                        pos[0] = base_lattice[0] + 0.5*self.lat_a
+                        pos[1] = base_lattice[1] + (0.5/3**0.5) * self.lat_a
+                        pos[2] = base_lattice[2] + 0
                         
-                        system.atoms_list.append(atom.atom(mass_C, idx+3,atom_type,'C'))
+     
+                        system.atoms_list.append(atom.atom(mass_C, idx+1, atom_type,'C'))
                         system.atoms_list[-1].pos     = np.copy(pos)
                         system.atoms_list[-1].vel     = np.copy(vel)
-                        system.atoms_list[-1].layer   = 2*k + 1
+                        system.atoms_list[-1].layer   = 2*k 
                         system.atoms_list[-1].lattice = True
                         
                         if self.mark_corner:
@@ -129,13 +104,107 @@ class create:
                             elif(i == 0             and j == num_rep[1]-1): system.atoms_list[-1].corner = True
                             elif(i == num_rep[0] -1 and j == 0           ): system.atoms_list[-2].corner = True
                             elif(i == num_rep[0] -1 and j == num_rep[1]-1): system.atoms_list[-1].corner = True
-        
-                        idx += 4
-                    else:
-                        idx += 2
+                            
+                        if not self.is_graphene:
+                            pos[0] = base_lattice[0] + 0.5*self.lat_a
+                            pos[1] = base_lattice[1] + (0.5/3.0**0.5) * self.lat_a
+                            pos[2] = base_lattice[2] + 0.5*self.lat_c
+                            
+                            atom_type = 2*k + 2
+                            system.atoms_list.append(atom.atom(mass_C, idx+2, atom_type,'C'))
+                            system.atoms_list[-1].pos     = np.copy(pos)
+                            system.atoms_list[-1].vel     = np.copy(vel)
+                            system.atoms_list[-1].layer   = 2*k + 1
+                            system.atoms_list[-1].lattice = True
                         
-                    z_max = np.copy(pos[2])
-                    
+                            pos[0] = base_lattice[0] + 1.0*self.lat_a
+                            pos[1] = base_lattice[1] + (1.0/3.0**0.5) * self.lat_a
+                            pos[2] = base_lattice[2] + 0.5*self.lat_c
+    
+                            system.atoms_list.append(atom.atom(mass_C, idx+3,atom_type,'C'))
+                            system.atoms_list[-1].pos     = np.copy(pos)
+                            system.atoms_list[-1].vel     = np.copy(vel)
+                            system.atoms_list[-1].layer   = 2*k + 1
+                            system.atoms_list[-1].lattice = True
+                            
+                            if self.mark_corner:
+                                if  (i == 0             and j == 0           ): system.atoms_list[-2].corner = True
+                                elif(i == 0             and j == num_rep[1]-1): system.atoms_list[-1].corner = True
+                                elif(i == num_rep[0] -1 and j == 0           ): system.atoms_list[-2].corner = True
+                                elif(i == num_rep[0] -1 and j == num_rep[1]-1): system.atoms_list[-1].corner = True
+            
+                            idx += 4
+                        else:
+                            idx += 2
+                            
+                        z_max = np.copy(pos[2])
+        
+        else:   # Orthogonal box
+            for i in range(num_rep[0]):
+                for j in range(num_rep[1]):
+                    for k in range(num_rep[2]):
+                        base_lattice[0] = i*lattice_vec[0][0] + j*lattice_vec[1][0] + k*lattice_vec[2][0]
+                        base_lattice[1] = i*lattice_vec[0][1] + j*lattice_vec[1][1] + k*lattice_vec[2][1]
+                        base_lattice[2] = i*lattice_vec[0][2] + j*lattice_vec[1][2] + k*lattice_vec[2][2]
+                        
+                        height_mod = k%2 
+                        
+                        pos[0] = base_lattice[0] + (3/4 + height_mod) * self.lat_a/3**0.5
+                        pos[1] = base_lattice[1] + (1/4*3**0.5) * self.lat_a/3**0.5
+                        pos[2] = base_lattice[2] + self.lat_c/4
+                        
+                        atom_type = k + 1
+                        system.atoms_list.append(atom.atom(mass_C, idx, atom_type,'C'))
+                        system.atoms_list[-1].pos     = np.copy(pos)
+                        system.atoms_list[-1].vel     = np.copy(vel)
+                        system.atoms_list[-1].layer   = k
+                        system.atoms_list[-1].lattice = True
+                                 
+                        pos[0] = base_lattice[0] + (5/4 + height_mod) * self.lat_a/3**0.5
+                        pos[1] = base_lattice[1] + (3/4*3**0.5) * self.lat_a/3**0.5
+                        pos[2] = base_lattice[2] + self.lat_c/4
+                        
+                        system.atoms_list.append(atom.atom(mass_C, idx+1, atom_type,'C'))
+                        system.atoms_list[-1].pos     = np.copy(pos)
+                        system.atoms_list[-1].vel     = np.copy(vel)
+                        system.atoms_list[-1].layer   = k 
+                        system.atoms_list[-1].lattice = True
+                        
+                        pos[0] = base_lattice[0] + (9/4 - 2*height_mod) * self.lat_a/3**0.5
+                        pos[1] = base_lattice[1] + (3/4*3**0.5) * self.lat_a/3**0.5
+                        pos[2] = base_lattice[2] + self.lat_c/4
+                        
+                        system.atoms_list.append(atom.atom(mass_C, idx+2, atom_type,'C'))
+                        system.atoms_list[-1].pos     = np.copy(pos)
+                        system.atoms_list[-1].vel     = np.copy(vel)
+                        system.atoms_list[-1].layer   = k 
+                        system.atoms_list[-1].lattice = True
+                        
+                        pos[0] = base_lattice[0] + (11/4 - 2*height_mod) * self.lat_a/3**0.5
+                        pos[1] = base_lattice[1] + (1/4*3**0.5) * self.lat_a/3**0.5
+                        pos[2] = base_lattice[2] + self.lat_c/4
+                        
+                        system.atoms_list.append(atom.atom(mass_C, idx+3, atom_type,'C'))
+                        system.atoms_list[-1].pos     = np.copy(pos)
+                        system.atoms_list[-1].vel     = np.copy(vel)
+                        system.atoms_list[-1].layer   = k 
+                        system.atoms_list[-1].lattice = True
+                        
+                        if self.mark_corner:
+                            if(height_mod == 0):
+                                if  (i == 0             and j == 0           ): system.atoms_list[-4].corner = True
+                                elif(i == 0             and j == num_rep[1]-1): system.atoms_list[-3].corner = True
+                                elif(i == num_rep[0] -1 and j == 0           ): system.atoms_list[-1].corner = True
+                                elif(i == num_rep[0] -1 and j == num_rep[1]-1): system.atoms_list[-2].corner = True
+                            else:
+                                if  (i == 0             and j == 0           ): system.atoms_list[-1].corner = True
+                                elif(i == 0             and j == num_rep[1]-1): system.atoms_list[-2].corner = True
+                                elif(i == num_rep[0] -1 and j == 0           ): system.atoms_list[-4].corner = True
+                                elif(i == num_rep[0] -1 and j == num_rep[1]-1): system.atoms_list[-3].corner = True
+                            
+                        idx += 4  
+                        z_max = np.copy(pos[2])
+                        
         num_atoms   = len(system.atoms_list)
         
         # Adjust the z coordinates so that the top layer has z = 0
@@ -185,6 +254,9 @@ class create:
             num_layers = 1 * self.num_rep[2]
         else:
             num_layers = 2 * self.num_rep[2]
+            
+        if self.ortho_box:
+            num_layers = 1 * self.num_rep[2]
             
         layer_count = np.zeros((num_layers,), dtype=int)
 
@@ -286,7 +358,8 @@ class create:
             flmp.write("%6.8E %6.8E xlo xhi\n"%(system.box[0], system.box[1]))
             flmp.write("%6.8E %6.8E ylo yhi\n"%(system.box[2], system.box[3]))
             flmp.write("%6.8E %6.8E zlo zhi\n\n"%(system.box[4], system.box[5]))
-            flmp.write("%6.8E  %6.8E  %6.8E  xy xz yz\n\n"%(system.xyz[0], system.xyz[1], system.xyz[2]))
+            if not self.ortho_box:
+                flmp.write("%6.8E  %6.8E  %6.8E  xy xz yz\n\n"%(system.xyz[0], system.xyz[1], system.xyz[2]))
             flmp.write("Atoms\n\n")
             for i in range(num_atoms):
                 at = system.atoms_list[i]
@@ -325,7 +398,27 @@ class create:
         self.vac_height = abs(self.vac_height)
         
         if self.ortho_box:
-            sys.exit(" Orthogonal simulation box not yet supported !!!!\n Set create.ortho_box=False")
+            # sys.exit(" Orthogonal simulation box not yet supported !!!!\n Set create.ortho_box=False")
+            system.lattice_vec = np.zeros((3,3))
+            system.lattice_vec[0][0] = 3**0.5 * self.lat_a
+            system.lattice_vec[1][1] = self.lat_a
+            system.lattice_vec[2][2] = 0.5 * self.lat_c
+            
+            system.box = np.zeros((6,))
+            system.box[1] = 3**0.5 * self.lat_a * self.num_rep[0]
+            system.box[3] = self.lat_a * self.num_rep[1]
+            system.box[4] = -1 * self.vac_height[0]
+            system.box[5] =  1 * self.vac_height[1] + 0.5 * self.lat_c * self.num_rep[2]
+            
+            system.box[4] = 0
+            system.box[5] =   0.5 * self.lat_c * self.num_rep[2]
+            
+            system.lattice_pos = np.zeros((4,3))
+            system.lattice_pos[0] = np.array([3/4/3**0.5  * self.lat_a , 0.25 * self.lat_a,  0.25 * self.lat_c])
+            system.lattice_pos[1] = np.array([5/4/3**0.5  * self.lat_a , 0.75 * self.lat_a,  0.25 * self.lat_c])
+            system.lattice_pos[2] = np.array([9/4/3**0.5  * self.lat_a , 0.75 * self.lat_a,  0.25 * self.lat_c])
+            system.lattice_pos[3] = np.array([11/4/3**0.5 * self.lat_a , 0.25 * self.lat_a,  0.25 * self.lat_c])
+            
         else:
             system.lattice_vec       = np.zeros((3,3))
             system.lattice_vec[0][0] = self.lat_a
@@ -341,6 +434,11 @@ class create:
             system.box[3] = 0.5 * 3**0.5 * self.lat_a * self.num_rep[1]
             system.box[4] = -1 * self.vac_height[0]
             system.box[5] =  1 * self.vac_height[1] + self.lat_c * self.num_rep[2] 
+            
+            system.lattice_pos    = np.zeros((4,3))
+            system.lattice_pos[1] = np.array([0.5*self.lat_a, (0.5/3**0.5)*self.lat_a, 0])
+            system.lattice_pos[2] = np.array([0.5*self.lat_a, (0.5/3**0.5)*self.lat_a, 0.5*self.lat_c])
+            system.lattice_pos[3] = np.array([1.0*self.lat_a, (1.0/3**0.5)*self.lat_a, 0.5*self.lat_c])
             
             
     def get_lat_const_from_file(self):
