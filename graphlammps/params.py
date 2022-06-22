@@ -2,7 +2,7 @@ import os
 
 Curr_dir = os.getcwd() 
 
-Lib_dir  = "/Users/ckondur/Desktop/Software/graphlammps-master/"
+Lib_dir  = "/home/chaithanya/Workspace/graphlammps-master/"
 Data_dir = Lib_dir + "data/"
 
 Lat_const_file = Data_dir + "Lat_const.dat"

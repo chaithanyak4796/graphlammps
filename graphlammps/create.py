@@ -410,9 +410,6 @@ class create:
             system.box[4] = -1 * self.vac_height[0]
             system.box[5] =  1 * self.vac_height[1] + 0.5 * self.lat_c * self.num_rep[2]
             
-            system.box[4] = 0
-            system.box[5] =   0.5 * self.lat_c * self.num_rep[2]
-            
             system.lattice_pos = np.zeros((4,3))
             system.lattice_pos[0] = np.array([3/4/3**0.5  * self.lat_a , 0.25 * self.lat_a,  0.25 * self.lat_c])
             system.lattice_pos[1] = np.array([5/4/3**0.5  * self.lat_a , 0.75 * self.lat_a,  0.25 * self.lat_c])
@@ -487,7 +484,7 @@ class create:
             print("Lattice params found = ",lat_param)
         else:
             
-            print("\n Error : Temp not found in the potential.")
+            print("\n Warning : Temp not found in the potential.")
             
             lat_param    = np.copy(Lat_const[idx_pot][0])
             lat_param[0] = self.Lat_Temp
