@@ -1,9 +1,6 @@
-import os
+Dir_Lib="/home/chaithanya/Workspace/graphlammps-master/"
 
-Curr_dir = os.getcwd() 
-
-Lib_dir  = "/home/chaithanya/Workspace/graphlammps-master/"
-Data_dir = Lib_dir + "data/"
+Data_dir = Dir_Lib + "data/"
 
 Lat_const_file = Data_dir + "Lat_const.dat"
 

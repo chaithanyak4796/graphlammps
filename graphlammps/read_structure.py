@@ -13,22 +13,24 @@ import os
 
 from graphlammps import lmp_system, atom
 
-default_cols = ['id', 'type', 'element', 'q', 'x', 'y', 'z']
+cols_vel_no  = ['id', 'type', 'element', 'q', 'x', 'y', 'z']
+cols_vel_yes = ['id', 'type', 'element', 'q', 'x', 'y', 'z', 'vx', 'vy', 'vz']
 #----------------------------------------------------------------------------------------------------------------#
 class read_structure:
     """ This class contains the functions to read the various formats of lammps structure outputs.
         Currently supported : .xyz, .dump
     
     """
-    def __init__(self, fname, cols=default_cols, dt=0.1E-3):
+    def __init__(self, fname, dt=0.1E-3, read_vel=False):
         self.num_timesteps = 1
         self.fname = fname
-        self.cols  = cols
-        self.default_cols = default_cols
         self.dt    = dt
         
-        if(self.cols != self.default_cols):
-            sys.exit("The column mapping provided is currently not supported.")
+        self.read_vel = read_vel 
+        if(self.read_vel):
+            self.cols = [cols_vel_yes]
+        else:
+            self.cols = [cols_vel_no, cols_vel_yes]
             
         self.use_cache = True    # Use cache or not?
         
@@ -66,8 +68,8 @@ class read_structure:
                 if (file_fname.strip() != self.fname.strip() or file_mtime.strip() != mtime.strip() ):
                     write_cache = True
                     print(" Dump cache exists, but is outdated. Will write new cache.")
-                    print(file_fname.strip(),self.fname.strip())
-                    print(file_mtime.strip(),mtime.strip())
+                    # print(file_fname.strip(),self.fname.strip())
+                    # print(file_mtime.strip(),mtime.strip())
                 else:
                     print("Dump cache exists and is up to date. Will read the cache.")
                     self.num_timesteps = int(fc.readline())
@@ -116,7 +118,7 @@ class read_structure:
         self.num_timesteps = len(self.line_offset)
     
     def read_dump_next_timestep(self):
-        system = self.read_dump_info()
+        system = self.__read_dump_info()
         return system
         
     def read_dump_timestep(self, step):
@@ -132,10 +134,10 @@ class read_structure:
         self.fr.seek(self.line_offset[idx][1])
         
         # Read the dump information 
-        system = self.read_dump_info()
+        system = self.__read_dump_info()
         return system
         
-    def read_dump_info(self):
+    def __read_dump_info(self):
         """ This function reads the next time step in the dump file and returns a lmp_system object """
         
         system = lmp_system.lmp_system()
@@ -174,30 +176,47 @@ class read_structure:
             system.xyz[2]    = float(line_3[2])
             
         else: # ortho_box
-            system.xlo, system.xhi = float(line_1)
-            system.ylo, system.yhi = float(line_2)
-            system.zlo, system.zhi = float(line_3)
+            system.xlo, system.xhi = [float(l) for l in line_1]
+            system.ylo, system.yhi = [float(l) for l in line_2]
+            system.zlo, system.zhi = [float(l) for l in line_3]
             
             
         line = self.fr.readline().split() # ITEM: ATOMS
         line = line[2:]
         
-        if (line != self.cols):
+        if (line not in self.cols):
             sys.exit("Coloumns in file do not match the given mapping")
-    
-        for i in range(system.num_atoms):
-            system.atoms_list.append(atom.atom())
-            line = self.fr.readline().split()
-            at = system.atoms_list[-1]
-            
-            at.idx    = int(line[0])
-            at.type   = int(line[1])
-            at.name   = line[2]
-            at.q      = float(line[3])
-            at.pos[0] = float(line[4])
-            at.pos[1] = float(line[5])
-            at.pos[2] = float(line[6])
         
+        if not self.read_vel:
+            for i in range(system.num_atoms):
+                system.atoms_list.append(atom.atom())
+                line = self.fr.readline().split()
+                at = system.atoms_list[-1]
+                
+                at.idx    = int(line[0])
+                at.type   = int(line[1])
+                at.name   = line[2]
+                at.q      = float(line[3])
+                at.pos[0] = float(line[4])
+                at.pos[1] = float(line[5])
+                at.pos[2] = float(line[6])
+        else:
+            for i in range(system.num_atoms):
+                system.atoms_list.append(atom.atom())
+                line = self.fr.readline().split()
+                at = system.atoms_list[-1]
+                
+                at.idx    = int(line[0])
+                at.type   = int(line[1])
+                at.name   = line[2]
+                at.q      = float(line[3])
+                at.pos[0] = float(line[4])
+                at.pos[1] = float(line[5])
+                at.pos[2] = float(line[6])
+                at.vel[0] = float(line[7])
+                at.vel[1] = float(line[8])
+                at.vel[2] = float(line[9])
+                
         return system
     
     def close(self):

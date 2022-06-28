@@ -1,0 +1,9 @@
+* This is an example script to identify the reaction mechanisms that lead to O2 formation during sequential collisions.
+* It requires as inputs the outputs from reaxff/bonds and LAMMPS dump commands.
+* The algo sorts the mechanisms into
+      1. Gas-phase  (can be recombination or exchange)
+      2. Eley-Rideal
+      3. Langmuir-Hinselwood
+      4. Physisorption Induced
+      5. Exhange reactions (happening near the surface)
+      6. Short (Extremely short lived O-O complexes)

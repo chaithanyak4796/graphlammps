@@ -55,8 +55,8 @@ class bonds:
                 if (file_fname.strip() != self.fname.strip() or file_mtime.strip() != mtime.strip() ):
                     write_cache = True
                     print("Bonds cache exists, but is outdated. Will write new cache.")
-                    print(file_fname.strip(),self.fname.strip())
-                    print(file_mtime.strip(),mtime.strip())
+                    # print(file_fname.strip(),self.fname.strip())
+                    # print(file_mtime.strip(),mtime.strip())
                 else:
                     print("Bonds cache exists and is up to date. Will read the cache.")
                     self.num_timesteps = int(fc.readline())
