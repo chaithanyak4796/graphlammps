@@ -22,7 +22,29 @@ class species:
         except:
             sys.exit(f"Unable to open file {self.fname}. \nExiting.")
     
-        self.initialize_species_count()      
+        self.initialize_species_count()   
+        
+        self.line_offset = []
+        offset = 0
+        
+        with open(self.fname) as fr:
+            for line in fr:
+                offset_beg = offset
+                if("Timestep" in line.split()):
+                    offset += len(line)
+                    
+                    line    = fr.readline()
+                    offset += len(line)
+                    
+                    ts = int(line.split()[0])
+                    self.line_offset.append([ts, offset_beg])
+                else:
+                    sys.exit("Error while mapping the species file. Timestep not found at the expected location in the species file !!!!!")
+        
+        self.fr.seek(0)
+        self.line_offset   = np.array(self.line_offset)
+        self.num_timesteps = len(self.line_offset)
+        # self.spec_dict     = {}
         
     def initialize_species_count(self, name_list = name_list_default):
         """ name_list is the list of species names to be considered """
@@ -35,8 +57,27 @@ class species:
     
         self.adsorb = True    # Do you want to track adsorbed oxygen as a distinct species as oppposed to graphene-oxide
         
-        
+    
     def read_next_timestep(self):
+        self.__read_species_info()
+    
+    def read_species_timestep(self, step):
+        
+        # Check if the step is valid
+        idx = np.where(self.line_offset[:,0] == step)[0]
+        
+        if (len(idx) == 0):
+            sys.exit("Time step not found in bonds file.")
+        else:
+            idx = idx[0]
+            
+        # Get the file pointer to move to the appropriate location
+        self.fr.seek(self.line_offset[idx][1])
+        
+        # Read the bonds information 
+        self.__read_species_info()
+    
+    def __read_species_info(self):
         line = self.fr.readline()
         if (len(line) == 0):
             self.fr.close()
@@ -78,5 +119,5 @@ class species:
                     else            : count = int(c[-1])
                     name  = 'O_ads'
             
-            if name in self.spec_dict:
-                self.spec_dict[name] = count
+            if name in self.spec_count:
+                self.spec_count[name] = count
