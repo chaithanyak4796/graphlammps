@@ -15,6 +15,8 @@ from graphlammps import lmp_system, atom
 
 cols_vel_no  = ['id', 'type', 'element', 'q', 'x', 'y', 'z']
 cols_vel_yes = ['id', 'type', 'element', 'q', 'x', 'y', 'z', 'vx', 'vy', 'vz']
+use_cache    = True # Use cache or not?
+warn_cache   = True # Print the cache warnings or not? 
 #----------------------------------------------------------------------------------------------------------------#
 class read_structure:
     """ This class contains the functions to read the various formats of lammps structure outputs.
@@ -32,7 +34,8 @@ class read_structure:
         else:
             self.cols = [cols_vel_no, cols_vel_yes]
             
-        self.use_cache = True    # Use cache or not?
+        self.use_cache  = use_cache     # Use cache or not?
+        self.warn_cache = warn_cache    # Print the cache warnings or not?
         
         if(".dump" in self.fname):
             self.read_next_timestep   = self.read_dump_next_timestep
@@ -58,7 +61,7 @@ class read_structure:
             
             if not cache_exist:
                 write_cache = True
-                print("Dump cache does not exist. Will write new cache.")
+                if(self.warn_cache): print("Dump cache does not exist. Will write new cache.")
             else:
                 write_cache = False
                 fc = open(cache_struc_fname, "r+")
@@ -67,11 +70,11 @@ class read_structure:
                 mtime = "%s"%(os.path.getmtime(self.fname))
                 if (file_fname.strip() != self.fname.strip() or file_mtime.strip() != mtime.strip() ):
                     write_cache = True
-                    print(" Dump cache exists, but is outdated. Will write new cache.")
+                    if(self.warn_cache): print(" Dump cache exists, but is outdated. Will write new cache.")
                     # print(file_fname.strip(),self.fname.strip())
                     # print(file_mtime.strip(),mtime.strip())
                 else:
-                    print("Dump cache exists and is up to date. Will read the cache.")
+                    if(self.warn_cache): print("Dump cache exists and is up to date. Will read the cache.")
                     self.num_timesteps = int(fc.readline())
                     for i in range(self.num_timesteps):
                         line = fc.readline().split()
@@ -103,7 +106,7 @@ class read_structure:
                             offset += len(line)
                             
         if self.use_cache and write_cache:
-            print("Writing cache for the dump file.")
+            if(self.warn_cache): print("Writing cache for the dump file.")
             fc = open(cache_struc_fname, "w")
             fc.write("%s\n"%(self.fname))
             mtime = os.path.getmtime(self.fname)
@@ -179,7 +182,7 @@ class read_structure:
             system.xlo, system.xhi = [float(l) for l in line_1]
             system.ylo, system.yhi = [float(l) for l in line_2]
             system.zlo, system.zhi = [float(l) for l in line_3]
-            
+            system.box = np.array([system.xlo, system.xhi, system.ylo, system.yhi, system.zlo, system.zhi])
             
         line = self.fr.readline().split() # ITEM: ATOMS
         line = line[2:]

@@ -16,7 +16,21 @@ class lmp_system:
     """
     
     def __init__(self, name='general'):
-        self.name = name
-        self.atoms_list = []
+        self.name           = name
+        self.atoms_list     = []
+        self.num_atom_types = 0
+        self.num_atoms      = 0
 
+    def get_num_atom_types(self):
+        atype = []
+        for at in self.atoms_list:
+            atype.append(at.type)
+        self.num_atom_types = max(atype)
     
+    def renumber_atoms(self):
+        idx = 1
+        for at in self.atoms_list:
+            at.idx = idx
+            idx   += 1
+        self.num_atoms = len(self.atoms_list)
+        self.get_num_atom_types()

@@ -23,13 +23,17 @@ class bond_info:
         self.nlp   = 0
         self.q     = 0
 
+use_cache    = True # Use cache or not? 
+warn_cache   = True # Print the cache warnings or not? 
+
 class bonds:
     def __init__(self, fname, dt = 0.1E-3):
         self.fname = fname
         self.dt    = dt
         
-        self.use_cache = True    # Use cache or not?
-        
+        self.use_cache = use_cache    # Use cache or not?
+        self.warn_cache = warn_cache    # Print the cache warnings or not? 
+
         try:
             self.fr = open(fname, "r")
         except:
@@ -45,7 +49,7 @@ class bonds:
             
             if not cache_exist:
                 write_cache = True
-                print("Bonds cache does not exist. Will write new cache.")
+                if(self.warn_cache): print("Bonds cache does not exist. Will write new cache.")
             else:
                 write_cache = False
                 fc = open(cache_bonds_fname, "r+")
@@ -54,11 +58,11 @@ class bonds:
                 mtime = "%s"%(os.path.getmtime(self.fname))
                 if (file_fname.strip() != self.fname.strip() or file_mtime.strip() != mtime.strip() ):
                     write_cache = True
-                    print("Bonds cache exists, but is outdated. Will write new cache.")
+                    if(self.warn_cache): print("Bonds cache exists, but is outdated. Will write new cache.")
                     # print(file_fname.strip(),self.fname.strip())
                     # print(file_mtime.strip(),mtime.strip())
                 else:
-                    print("Bonds cache exists and is up to date. Will read the cache.")
+                    if(self.warn_cache): print("Bonds cache exists and is up to date. Will read the cache.")
                     self.num_timesteps = int(fc.readline())
                     for i in range(self.num_timesteps):
                         line = fc.readline().split()
@@ -88,7 +92,7 @@ class bonds:
                         sys.exit("Error while mapping the bonds file. Timestep not found at the expected location in the bonds file. !!!!!")
         
         if self.use_cache and write_cache:
-            print("Writing cache for the bonds file.")
+            if(self.warn_cache): print("Writing cache for the bonds file.")
             fc = open(cache_bonds_fname, "w")
             fc.write("%s\n"%(self.fname))
             mtime = os.path.getmtime(self.fname)

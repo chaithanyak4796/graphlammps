@@ -67,7 +67,7 @@ class species:
         idx = np.where(self.line_offset[:,0] == step)[0]
         
         if (len(idx) == 0):
-            sys.exit("Time step not found in bonds file.")
+            sys.exit("Time step not found in species file.")
         else:
             idx = idx[0]
             
@@ -105,6 +105,9 @@ class species:
             
     def parse_species(self):
         """ This function parses the line read from the species file """
+        for name in self.spec_count:
+            self.spec_count[name] = 0
+
         for i in range(len(self.spec_info)):
             name  = self.spec_info[i][0]
             count = self.spec_info[i][1]

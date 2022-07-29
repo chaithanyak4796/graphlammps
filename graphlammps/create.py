@@ -241,7 +241,7 @@ class create:
                     at.name = 'N'
             
         ##################################################################
-        system.atom_type = atom_type
+        system.num_atom_types = atom_type
         
         # Write the structure files
         self.write_struc(system)
@@ -347,14 +347,15 @@ class create:
     def write_struc(self, system, write_lmp=True, write_xyz=True):
         """ This function writes the positions of the atoms in the .lmp and .xyz formats"""
         num_atoms = len(system.atoms_list)
-        
+        if(system.num_atom_types <= 0): system.get_num_atom_types()
+
         if write_lmp:
             self.lmp_fname = self.struc_fname_prefix + ".lmp"
             flmp  = open(self.lmp_fname, "w")
             
             flmp.write(" Hexagonal lattice structure of dimension %d x %d x %d with a = %.4f and c = %.4f\n"%(self.num_rep[0], self.num_rep[1], self.num_rep[2], self.lat_a, self.lat_c))
             flmp.write("%d atoms\n"%(num_atoms))
-            flmp.write("%d atom types\n\n"%(system.atom_type))
+            flmp.write("%d atom types\n\n"%(system.num_atom_types))
             flmp.write("%6.8E %6.8E xlo xhi\n"%(system.box[0], system.box[1]))
             flmp.write("%6.8E %6.8E ylo yhi\n"%(system.box[2], system.box[3]))
             flmp.write("%6.8E %6.8E zlo zhi\n\n"%(system.box[4], system.box[5]))
@@ -363,7 +364,7 @@ class create:
             flmp.write("Atoms\n\n")
             for i in range(num_atoms):
                 at = system.atoms_list[i]
-                flmp.write("%5d  %2d  %6.4E  %6.8E  %6.8E  %6.8E\n"%(at.idx, at.type, 0.0, at.pos[0], at.pos[1], at.pos[2]))
+                flmp.write("%5d  %2d  %6.4E  %6.8E  %6.8E  %6.8E\n"%(at.idx, at.type, at.q, at.pos[0], at.pos[1], at.pos[2]))
             
             flmp.close()
         

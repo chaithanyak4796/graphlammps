@@ -1,4 +1,4 @@
-Dir_Lib="/home/chaithanya/Workspace/graphlammps-master/"
+Dir_Lib="/home5/ckondur/Workspace/graphlammps/"
 
 Data_dir = Dir_Lib + "data/"
 
