@@ -75,21 +75,22 @@ class bonds:
                     offset_beg = offset
                     if("Timestep" in line.split()):
                         ts      = int(line.split()[-1])
-                        offset += len(line)
+                        offset += len(line)  
                         
-                        self.line_offset.append([ts, offset_beg])
-                        
-                        line    = fr.readline()
-                        offset += len(line)
-                        line    = fr.readline()
-                        natoms  = int(line.split()[-1])
-                        offset += len(line)
-                        
-                        for i in range(natoms+5):
+                        for i in range(6):
                             line    = fr.readline()
                             offset += len(line)
+                        natoms = 0
+                        while(True):
+                            line    = fr.readline()
+                            offset += len(line)
+                            if ("#" in line.split()):
+                                break
+                            else:
+                                natoms += 1
+                        self.line_offset.append([ts, offset_beg, natoms])
                     else:
-                        sys.exit("Error while mapping the bonds file. Timestep not found at the expected location in the bonds file. !!!!!")
+                        sys.exit(f" Error while mapping the bonds file : {self.fname}\n Timestep not found at the expected location in the bonds file. !!!!!\n Check near timestep {ts}\n {line}")
         
         if self.use_cache and write_cache:
             if(self.warn_cache): print("Writing cache for the bonds file.")
@@ -112,9 +113,10 @@ class bonds:
         idx = np.where(self.line_offset[:,0] == step)[0]
         
         if (len(idx) == 0):
-            sys.exit("Time step not found in bonds file.")
+            sys.exit(f"Time step {step} not found in bonds file.")
         else:
             idx = idx[0]
+            self.num_atoms = self.line_offset[idx][2]
             
         # Get the file pointer to move to the appropriate location
         self.fr.seek(self.line_offset[idx][1])
@@ -127,7 +129,7 @@ class bonds:
         line = self.fr.readline()
         # print(line)
         if (len(line) == 0):
-            self.fr.close()
+            # self.fr.close()
             raise Exception(f" Reached end of file : {self.fname}")
         else:
             self.timestep = int(line.split()[-1])
@@ -136,7 +138,7 @@ class bonds:
             line = self.fr.readline()
             line = self.fr.readline().split()
             
-            self.num_atoms = int(line[-1])
+            # self.num_atoms = int(line[-1])
             
             for _ in range(4): 
                 line = self.fr.readline()

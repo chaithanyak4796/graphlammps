@@ -67,7 +67,7 @@ class species:
         idx = np.where(self.line_offset[:,0] == step)[0]
         
         if (len(idx) == 0):
-            sys.exit("Time step not found in species file.")
+            sys.exit(f"Time step {species} not found in species file.")
         else:
             idx = idx[0]
             

@@ -129,7 +129,7 @@ class read_structure:
         idx = np.where(self.line_offset[:,0] == step)[0]
         
         if (len(idx) == 0):
-            sys.exit("Time step not found in structure file.")
+            sys.exit(f"Time step {step} not found in structure file.")
         else:
             idx = idx[0]
             
