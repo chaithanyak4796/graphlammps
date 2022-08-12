@@ -13,15 +13,16 @@ import os
 
 class bond_info:
     def __init__(self):
-        self.id    = 1
-        self.type  = 1
-        self.nb    = 1
-        self.id_nb = []
-        self.mol   = 0
-        self.bo_nb = []
-        self.abo   = 0
-        self.nlp   = 0
-        self.q     = 0
+        self.id      = 1
+        self.type    = 1
+        self.nb      = 1
+        self.id_nb   = []
+        self.mol     = 0
+        self.bo_nb   = []
+        self.abo     = 0
+        self.nlp     = 0
+        self.q       = 0
+        self.type_nb = []
 
 use_cache    = True # Use cache or not? 
 warn_cache   = True # Print the cache warnings or not? 
@@ -66,7 +67,7 @@ class bonds:
                     self.num_timesteps = int(fc.readline())
                     for i in range(self.num_timesteps):
                         line = fc.readline().split()
-                        self.line_offset.append([int(line[0]), int(line[1])])
+                        self.line_offset.append([int(line[0]), int(line[1]), int(line[2])])
                 fc.close()
             
         if ((self.use_cache == False) or (self.use_cache and write_cache)):       
@@ -100,7 +101,7 @@ class bonds:
             fc.write("%s\n"%(mtime))
             fc.write("%d\n"%(len(self.line_offset)))
             for i in range(len(self.line_offset)):
-                fc.write("%d %d\n"%(self.line_offset[i][0], self.line_offset[i][1]))
+                fc.write("%d %d %d\n"%(self.line_offset[i][0], self.line_offset[i][1], self.line_offset[i][2]))
             fc.close()
             
         self.fr.seek(0)
@@ -200,3 +201,18 @@ class bonds:
         
         # print("%d O2 molecules found at timestep %d"%(len(O2_idx), self.timestep))
         return O2_idx
+
+    def get_neighbor_info(self, idx):
+        """ Update the idenities of the neighboring atoms"""
+        self.bonds_list[idx].type_nb = []
+        for i in self.bonds_list[idx].id_nb:
+            j = self.get_bond(i)
+            self.bonds_list[idx].type_nb.append(self.bonds_list[j].type)
+
+    def get_bond(self, idx):
+        """ In some cases the bonds_list[idx].id will not equal idx+1
+            In those cases, use this function to get i where bonds_list[i] == idx"""
+        for i in range(len(self.bonds_list)):
+            if(self.bonds_list[i].id == idx):
+                return i
+        sys.exit('Error in get_bond(): No bond with id==idx found.')
