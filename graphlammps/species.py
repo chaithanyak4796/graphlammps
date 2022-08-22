@@ -8,17 +8,18 @@ Created on Tue Jun  7 16:08:13 2022
 
 import numpy as np
 import sys
+import os
 
 name_list_default = ['O_ads', 'O', 'O2', 'CO', 'CO2']
 
 class species:
     
     def __init__(self, fname, dt=0.1E-3):
-        self.fname = fname
+        self.fname = os.path.abspath(fname)
         self.dt    = dt
         
         try:
-            self.fr = open(fname, "r")
+            self.fr = open(self.fname, "r")
         except:
             sys.exit(f"Unable to open file {self.fname}. \nExiting.")
     

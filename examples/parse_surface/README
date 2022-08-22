@@ -1,0 +1,4 @@
+This is an example script that demonstrates the usage of special.parse_bonds class.
+It requires as inputs the outputs from reaxff/bonds command.
+
+- Ads_O_bridge_v_top.py : Python script that reads 'bonds.out' file and plots the fraction of adsorbed O atoms in the bridge and top sites.

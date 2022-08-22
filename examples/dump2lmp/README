@@ -1,0 +1,5 @@
+This is an example script to convert a LAMMPS dump to a .lmp file
+
+- dump2lmp.py : Python script that utilizes the library to create convert the structure files.
+- coords.dump : The dump file to be converted.
+- coords.lmp  : The converted lmp file.

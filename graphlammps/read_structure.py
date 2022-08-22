@@ -25,7 +25,7 @@ class read_structure:
     """
     def __init__(self, fname, dt=0.1E-3, read_vel=False):
         self.num_timesteps = 1
-        self.fname = fname
+        self.fname = os.path.abspath(fname)
         self.dt    = dt
         
         self.read_vel = read_vel 

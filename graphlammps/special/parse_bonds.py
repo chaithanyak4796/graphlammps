@@ -53,7 +53,7 @@ class parse_bonds():
                             b1    = bonds.bonds_list[b1_id]
                        
                             bonds.get_neighbor_info(b1_id)
-                            if(b1.nb == 2):
+                            if(b1.nb > 1):
                                mol.name = 'LH candidate'
                                mol.atom_id = [b0.id, b1.id]
                                LH_cand = True
@@ -112,7 +112,7 @@ class parse_bonds():
                         
                     else:
                         mol.name    = "CO adsorbed"
-                        mol.atom_id = [b1.id, b2.id]
+                        mol.atom_id = [b1.id, b0.id]
                         
                 elif(b1.nb == 3):
                     bonds.get_neighbor_info(b1_id)

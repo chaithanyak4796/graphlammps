@@ -29,14 +29,14 @@ warn_cache   = True # Print the cache warnings or not?
 
 class bonds:
     def __init__(self, fname, dt = 0.1E-3):
-        self.fname = fname
+        self.fname = os.path.abspath(fname)
         self.dt    = dt
         
         self.use_cache = use_cache    # Use cache or not?
         self.warn_cache = warn_cache    # Print the cache warnings or not? 
 
         try:
-            self.fr = open(fname, "r")
+            self.fr = open(self.fname, "r")
         except:
             sys.exit(f"Unable to open file {self.fname}. \nExiting.")
             
@@ -173,7 +173,10 @@ class bonds:
             self.bonds_list.sort(key=lambda x: x.id)
             
     def read_next_timestep(self):
-        self.__read_bonds_info()
+        ts_curr = self.timestep
+        idx     = np.where(ts_curr == self.line_offset[:,0])[0][0]  
+        ts_curr = self.line_offset[idx + 1][0]
+        self.read_bonds_timestep(ts_curr)
         
     def close(self):
         self.fr.close()
