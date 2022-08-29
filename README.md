@@ -13,7 +13,7 @@ This library also includes post-processing utilities.
 GraphLAMMPS is compatible with Python 3.7+
 
 ~~~bash
-$ make install
+$ source install.sh
 ~~~
 
 > Package is not yet uploaded to Pypi.
@@ -25,8 +25,8 @@ $ make install
 We ask that any publications which use GraphLAMMPS cite as following:
 
 ```
-@misc{tekinalp2022pyelastica,
-  title={GraphLAMMPS: Graphite Interacting with Gasseous Atoms},
+@misc{ckondur2022GraphLAMMPS,
+  title={GraphLAMMPS: Tool for LAMMPS simulations of Graphite Interacting with Gasseous Atoms},
   author={Chaithanya Kondur},
   journal={https://github.com/chaithanyak4796/graphlammps},
   year={2022},
