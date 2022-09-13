@@ -1,5 +1,5 @@
 <div align='center'>
-<h1> GraphLAMMPS: Graphite LAMPPS </h1>
+<h1> GraphLAMMPS: Graphite LAMMPS </h1>
 
 ![version][badge-package-version] ![python version][badge-python-version] [![CI][badge-CI]][link-CI] [![Documentation Status][badge-docs-status]][link-docs-status]
  </div>

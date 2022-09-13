@@ -41,8 +41,17 @@ class read_structure:
             self.read_next_timestep   = self.read_dump_next_timestep
             self.read_struc_timestep  = self.read_dump_timestep
             self.init_read_dump()
+        elif(".lmp" in self.fname):
+            self.init_read_lmp()
         else:
             sys.exit(" Invalid file extension. ")
+    
+    def init_read_lmp(self):
+        try:
+            self.fr = open(self.fname, "r")
+        except:
+            print(" Unable to open file : ", self.fname)
+            sys.exit(1)
             
     def init_read_dump(self):
         try:
@@ -221,6 +230,80 @@ class read_structure:
                 at.vel[2] = float(line[9])
                 
         return system
+    
+    def read_lmp_file(self):
+        system = lmp_system.lmp_system()
+        
+        line = self.fr.readline()  # Header
+        line = self.fr.readline().split()
+        system.num_atoms = int(line[0])
+        line = self.fr.readline().split()
+        system.num_atom_types = int(line[0])
+        
+        line = self.fr.readline()
+        line_1 = self.fr.readline().split()
+        line_2 = self.fr.readline().split()
+        line_3 = self.fr.readline().split()
+        
+        line = self.fr.readline()
+        line = self.fr.readline()
+        if("xy" in line):  # Non-ortho box
+            system.xyz = np.zeros((3,), dtype=float)
+            line       =  line.split()
+            
+            system.xlo_bound = float(line_1[0])
+            system.xhi_bound = float(line_1[1])
+            system.xyz[0]    = float(line[0])
+            
+            system.ylo_bound = float(line_2[0])
+            system.yhi_bound = float(line_2[1])
+            system.xyz[1]    = float(line[1])
+            
+            system.zlo_bound = float(line_3[0])
+            system.zhi_bound = float(line_3[1])
+            system.xyz[2]    = float(line[2])
+            
+            line = self.fr.readline()
+            line = self.fr.readline()
+        else: # ortho_box
+            system.xlo, system.xhi = [float(line_1[0]), float(line_1[1])]
+            system.ylo, system.yhi = [float(line_2[0]), float(line_2[1])]
+            system.zlo, system.zhi = [float(line_3[0]), float(line_3[1])]
+            system.box = np.array([system.xlo, system.xhi, system.ylo, system.yhi, system.zlo, system.zhi])
+            
+        if ("Atoms" in line):
+            line = self.fr.readline()
+            for i in range(system.num_atoms):
+                line = self.fr.readline().split()
+                
+                at        = atom.atom()
+                at.idx    = int(line[0])
+                at.type   = int(line[1])
+                at.q      = float(line[2])
+                at.pos[0] = float(line[3])
+                at.pos[1] = float(line[4])
+                at.pos[2] = float(line[5])
+                
+                system.atoms_list.append(at)
+        system.atoms_list.sort(key=lambda x: x.idx, reverse=False)
+        try:
+            line = self.fr.readline()
+            line = self.fr.readline()
+            
+            if("Velocities" in line):
+                line = self.fr.readline()
+                for i in range(system.num_atoms):
+                    line = self.fr.readline().split()
+                    idx = int(line[0])
+                    at = system.atoms_list[idx-1]
+                    at.vel[0] = float(line[1])
+                    at.vel[1] = float(line[2])
+                    at.vel[2] = float(line[3])
+        except:
+            pass
+        
+        return system
+        
     
     def close(self):
         self.fr.close()
