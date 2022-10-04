@@ -173,6 +173,7 @@ class read_structure:
         line_3 = self.fr.readline().split()
         
         if(line[3] == 'xy'): # non-ortho box
+            system.ortho_box = False
             system.xyz = np.zeros((3,), dtype=float)
             
             system.xlo_bound = float(line_1[0])
@@ -188,6 +189,7 @@ class read_structure:
             system.xyz[2]    = float(line_3[2])
             
         else: # ortho_box
+            system.ortho_box = True
             system.xlo, system.xhi = [float(l) for l in line_1]
             system.ylo, system.yhi = [float(l) for l in line_2]
             system.zlo, system.zhi = [float(l) for l in line_3]
@@ -229,6 +231,7 @@ class read_structure:
                 at.vel[1] = float(line[8])
                 at.vel[2] = float(line[9])
                 
+        system.atoms_list.sort(key=lambda x: x.idx, reverse=False)       
         return system
     
     def read_lmp_file(self):
@@ -248,6 +251,7 @@ class read_structure:
         line = self.fr.readline()
         line = self.fr.readline()
         if("xy" in line):  # Non-ortho box
+            system.ortho_box = False
             system.xyz = np.zeros((3,), dtype=float)
             line       =  line.split()
             
@@ -266,6 +270,7 @@ class read_structure:
             line = self.fr.readline()
             line = self.fr.readline()
         else: # ortho_box
+            system.ortho_box = True
             system.xlo, system.xhi = [float(line_1[0]), float(line_1[1])]
             system.ylo, system.yhi = [float(line_2[0]), float(line_2[1])]
             system.zlo, system.zhi = [float(line_3[0]), float(line_3[1])]

@@ -20,6 +20,7 @@ class lmp_system:
         self.atoms_list     = []
         self.num_atom_types = 0
         self.num_atoms      = 0
+        self.ortho_box      = True
 
     def get_num_atom_types(self):
         atype = []

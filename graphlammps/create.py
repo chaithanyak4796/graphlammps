@@ -16,7 +16,7 @@ class create:
         self.lat_c        = 3.35   # Lattice constant c (A)
         self.num_rep      = np.array([10,10,2],dtype=int)         # Number of unit cells in each direction
         self.vac_height   = np.array([10.0, 120.0], dtype=float)  # Vaccuum height along the z direction [bottom, top]
-        self.ortho_box    = False  # Using an orthogonal (True) or hexagonal (False) basis
+        self.ortho_box    = True  # Using an orthogonal (True) or hexagonal (False) basis
         
         self.use_lat_file = True   # Get the lattice constants from file
         self.Lat_file     = params.Lat_const_file 
@@ -399,7 +399,6 @@ class create:
         self.vac_height = abs(self.vac_height)
         
         if self.ortho_box:
-            # sys.exit(" Orthogonal simulation box not yet supported !!!!\n Set create.ortho_box=False")
             system.lattice_vec = np.zeros((3,3))
             system.lattice_vec[0][0] = 3**0.5 * self.lat_a
             system.lattice_vec[1][1] = self.lat_a
