@@ -48,10 +48,10 @@ class bonds:
             cache_bonds_fname = self.fname + ".cache" 
             cache_exist       = os.path.isfile(cache_bonds_fname)
             
-            if not cache_exist:
+            if not cache_exist:    # Cache does not exist
                 write_cache = True
                 if(self.warn_cache): print("Bonds cache does not exist. Will write new cache.")
-            else:
+            else:                  # Cache exists. Check if it is up to date
                 write_cache = False
                 fc = open(cache_bonds_fname, "r+")
                 file_fname = fc.readline()
@@ -70,7 +70,7 @@ class bonds:
                         self.line_offset.append([int(line[0]), int(line[1]), int(line[2])])
                 fc.close()
             
-        if ((self.use_cache == False) or (self.use_cache and write_cache)):       
+        if ((self.use_cache == False) or (self.use_cache and write_cache)):   # Prepare new line offset array
             with open(self.fname) as fr:
                 for line in fr:
                     offset_beg = offset
@@ -144,7 +144,8 @@ class bonds:
             for _ in range(4): 
                 line = self.fr.readline()
             
-            self.bonds_list = []
+            self.bonds_list = []    # List of all the bond_info instances
+            self.idx_map = {}       # Dictionary to map the atom_id to the index in the list
             
             for i in range(self.num_atoms):
                 bond = bond_info()
@@ -166,11 +167,12 @@ class bonds:
                 bond.q      = float(line[-1])
                 
                 self.bonds_list.append(bond)
+                self.idx_map[bond.id] = i
                 
             line = self.fr.readline()
             
             # Sort the bonds list based on the id attribute
-            self.bonds_list.sort(key=lambda x: x.id)
+            #self.bonds_list.sort(key=lambda x: x.id)
             
     def read_next_timestep(self):
         ts_curr = self.timestep
@@ -209,13 +211,22 @@ class bonds:
         """ Update the idenities of the neighboring atoms"""
         self.bonds_list[idx].type_nb = []
         for i in self.bonds_list[idx].id_nb:
-            j = self.get_bond(i)
+            j = self.get_bond_index(i)
             self.bonds_list[idx].type_nb.append(self.bonds_list[j].type)
 
-    def get_bond(self, idx):
+    def get_bond_index(self, idx):
         """ In some cases the bonds_list[idx].id will not equal idx+1
             In those cases, use this function to get i where bonds_list[i] == idx"""
         for i in range(len(self.bonds_list)):
             if(self.bonds_list[i].id == idx):
                 return i
         sys.exit('Error in get_bond(): No bond with id==idx found.')
+        
+    def get_bond(self, idx):
+        """ In some cases the bonds_list[idx].id will not equal idx+1
+            In those cases, use this function to get i where bonds_list[i] == idx"""
+        if idx in self.idx_map:
+            return self.bonds_list[self.idx_map[idx]]
+        else:
+            raise Exception('Error in get_bond(): No bond with id==idx found.')
+    

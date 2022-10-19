@@ -35,3 +35,9 @@ class lmp_system:
             idx   += 1
         self.num_atoms = len(self.atoms_list)
         self.get_num_atom_types()
+
+    def get_atom(self, idx):
+        for at in self.atoms_list:
+            if(at.idx == idx):
+                return at
+        sys.exit(f"Atom with atom id {idx} not found in the atoms_list.")
