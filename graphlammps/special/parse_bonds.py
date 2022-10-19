@@ -20,14 +20,13 @@ class parse_bonds():
         
         mol = molecule.molecule(name='None')
             
-        b0_id = bonds.get_bond(at_id)
-        b0    = bonds.bonds_list[b0_id]
+        b0 = bonds.get_bond(at_id)
         # print(b0.id, b0.id_nb)
         
         if(b0.type in self.C_type):
             sys.exit('C atom is the chosen atom')
         
-        bonds.get_neighbor_info(b0_id)
+        bonds.get_neighbor_info(at_id)
         
         if(b0.nb == 2):
             if (b0.type_nb[0] in self.C_type and b0.type_nb[1] in self.C_type):
@@ -36,19 +35,17 @@ class parse_bonds():
             else:
                 # Find the corner O atom
                 for i in range(2):
-                    b1_id = bonds.get_bond(b0.id_nb[i])
-                    b1    = bonds.bonds_list[b1_id]
+                    b1 = bonds.get_bond(b0.id_nb[i])
                     if(b1.type in self.O_type and b1.nb == 1):
-                        b0_id = b1_id
+                        b0 = b1
                         break
                 if(b1.type not in self.O_type or b1.nb != 1):
                     LH_cand=False
                     for i in range(2):
                         if(b0.type_nb[i] in self.O_type):
-                            b1_id = bonds.get_bond(b0.id_nb[i])
-                            b1    = bonds.bonds_list[b1_id]
+                            b1 = bonds.get_bond(b0.id_nb[i])
                        
-                            bonds.get_neighbor_info(b1_id)
+                            bonds.get_neighbor_info(b1.id)
                             if(b1.nb > 1):
                                mol.name = 'LH candidate'
                                mol.atom_id = [b0.id, b1.id]
@@ -58,8 +55,7 @@ class parse_bonds():
 
         
         # Now that corner atom is found, identify the molecule
-        b0    = bonds.bonds_list[b0_id]
-        bonds.get_neighbor_info(b0_id)
+        bonds.get_neighbor_info(b0.id)
         # print(b0.id, b0.id_nb)
         
         if(b0.nb == 0):
@@ -67,9 +63,8 @@ class parse_bonds():
             mol.atom_id = [b0.id]
             
         elif(b0.nb == 1):
-            b1_id = bonds.get_bond(b0.id_nb[0])
-            b1    = bonds.bonds_list[b1_id]
-            bonds.get_neighbor_info(b1_id)
+            b1 = bonds.get_bond(b0.id_nb[0])
+            bonds.get_neighbor_info(b1.id)
     
             # O-O
             if(b1.type in self.O_type):
@@ -78,10 +73,9 @@ class parse_bonds():
                     mol.atom_id = [b0.id, b1.id]
                     
                 elif(b1.nb == 2):
-                    b2_id = bonds.get_bond(b1.id_nb[0])
-                    if(b0_id == b2_id):
-                        b2_id = bonds.get_bond(b1.id_nb[1])    
-                    b2 = bonds.bonds_list[b2_id]
+                    b2 = bonds.get_bond(b1.id_nb[0])
+                    if(b0.id == b2.id):
+                        b2 = bonds.get_bond(b1.id_nb[1])    
     
                     if(b2.type in self.C_type):
                         mol.name    = "O2 adsorbed"
@@ -97,10 +91,9 @@ class parse_bonds():
                     mol.atom_id = [b0.id, b1.id] 
                     
                 elif(b1.nb == 2):
-                    b2_id = bonds.get_bond(b1.id_nb[0])
-                    if(b0_id == b2_id):
-                        b2_id = bonds.get_bond(b1.id_nb[1])
-                    b2 = bonds.bonds_list[b2_id]
+                    b2 = bonds.get_bond(b1.id_nb[0])
+                    if(b0.id == b2.id):
+                        b2 = bonds.get_bond(b1.id_nb[1])
                   
                     if(b2.type in self.O_type):
                         mol.name    = "Gas-phase CO2 molecule"
@@ -111,12 +104,11 @@ class parse_bonds():
                         mol.atom_id = [b1.id, b0.id]
                         
                 elif(b1.nb == 3):
-                    bonds.get_neighbor_info(b1_id)
+                    bonds.get_neighbor_info(b1.id)
                     count = [0, 0]
                     for i in range(3):
                         if(b1.type_nb[i] in self.O_type):
-                            b2_id = bonds.get_bond(b1.id_nb[i])
-                            b2    = bonds.bonds_list[b2_id]
+                            b2 = bonds.get_bond(b1.id_nb[i])
                             if(b2.nb == 1):
                                 count[0] += 1
                         elif(b1.type_nb[i] in self.C_type):
@@ -124,8 +116,7 @@ class parse_bonds():
                     if(count[0] == 2 and count[1] == 1):
                         mol.name    = "CO2 adsorbed"
                         for i in range(3):
-                            b2_id = bonds.get_bond(b1.id_nb[i])
-                            b2    = bonds.bonds_list[b2_id]
+                            b2 = bonds.get_bond(b1.id_nb[i])
                             if(b2.type in self.O_type and b2.id != b0.id): break
                         
                         mol.atom_id = [b0.id, b1.id, b2.id]
@@ -137,7 +128,7 @@ class parse_bonds():
                         mol.name    = "Top site O atom"
                         mol.atom_id = [b0.id]
                 elif(b1.nb == 4):
-                    bonds.get_neighbor_info(b1_id)
+                    bonds.get_neighbor_info(b1.id)
                     count_C = 0
                     for i in range(4):
                         if(b1.type_nb[i] in self.C_type):

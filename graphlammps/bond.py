@@ -206,27 +206,42 @@ class bonds:
         
         # print("%d O2 molecules found at timestep %d"%(len(O2_idx), self.timestep))
         return O2_idx
-
+        
+    def get_bond_idx(self, idx):
+        """ In some cases the bonds_list[idx].id will not equal idx+1
+            In those cases, use this function to get i where bonds_list[i] == idx"""
+        if idx in self.idx_map:
+            return self.idx_map[idx]
+        else:
+            raise Exception('Error in get_bond_idx(): No bond with id==idx found.')
+    
+    def get_bond(self, idx):
+        """ Return the bond_info instance given the bond index"""
+        return(self.bonds_list[self.get_bond_idx(idx)])
+            
     def get_neighbor_info(self, idx):
+        """ Update the atom types of the neighboring atoms"""
+        list_idx = self.get_bond_idx(idx)
+        
+        self.bonds_list[list_idx].type_nb = []
+        for i in self.bonds_list[list_idx].id_nb:
+            j = self.get_bond_idx(i)
+            self.bonds_list[list_idx].type_nb.append(self.bonds_list[j].type)
+ 
+    ########## Old ########################
+    
+    def get_neighbor_info_old(self, idx):
         """ Update the idenities of the neighboring atoms"""
         self.bonds_list[idx].type_nb = []
         for i in self.bonds_list[idx].id_nb:
             j = self.get_bond_index(i)
             self.bonds_list[idx].type_nb.append(self.bonds_list[j].type)
 
-    def get_bond_index(self, idx):
+    def get_bond_old(self, idx):
         """ In some cases the bonds_list[idx].id will not equal idx+1
             In those cases, use this function to get i where bonds_list[i] == idx"""
         for i in range(len(self.bonds_list)):
             if(self.bonds_list[i].id == idx):
                 return i
         sys.exit('Error in get_bond(): No bond with id==idx found.')
-        
-    def get_bond(self, idx):
-        """ In some cases the bonds_list[idx].id will not equal idx+1
-            In those cases, use this function to get i where bonds_list[i] == idx"""
-        if idx in self.idx_map:
-            return self.bonds_list[self.idx_map[idx]]
-        else:
-            raise Exception('Error in get_bond(): No bond with id==idx found.')
     
