@@ -152,7 +152,8 @@ class read_structure:
     def __read_dump_info(self):
         """ This function reads the next time step in the dump file and returns a lmp_system object """
         
-        system = lmp_system.lmp_system()
+        system         = lmp_system.lmp_system()
+        system.idx_map = {}
 
         line  = self.fr.readline()  # ITEM: TIMESTEP
         if(len(line) == 0):
@@ -214,6 +215,7 @@ class read_structure:
                 at.pos[0] = float(line[4])
                 at.pos[1] = float(line[5])
                 at.pos[2] = float(line[6])
+                system.idx_map[at.idx] = i
         else:
             for i in range(system.num_atoms):
                 system.atoms_list.append(atom.atom())
@@ -230,12 +232,15 @@ class read_structure:
                 at.vel[0] = float(line[7])
                 at.vel[1] = float(line[8])
                 at.vel[2] = float(line[9])
+                system.idx_map[at.idx] = i
                 
-        system.atoms_list.sort(key=lambda x: x.idx, reverse=False)       
+        #system.atoms_list.sort(key=lambda x: x.idx, reverse=False)       
         return system
     
     def read_lmp_file(self):
-        system = lmp_system.lmp_system()
+        
+        system         = lmp_system.lmp_system()
+        system.idx_map = {}
         
         line = self.fr.readline()  # Header
         line = self.fr.readline().split()
@@ -290,7 +295,9 @@ class read_structure:
                 at.pos[2] = float(line[5])
                 
                 system.atoms_list.append(at)
-        system.atoms_list.sort(key=lambda x: x.idx, reverse=False)
+                system.idx_map[at.idx] = i
+                
+        #system.atoms_list.sort(key=lambda x: x.idx, reverse=False)
         try:
             line = self.fr.readline()
             line = self.fr.readline()

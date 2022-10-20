@@ -19,6 +19,7 @@ class parse_bonds():
         bonds = self.bonds
         
         mol = molecule.molecule(name='None')
+        mol.atom_id = [at_id]
             
         b0 = bonds.get_bond(at_id)
         # print(b0.id, b0.id_nb)
