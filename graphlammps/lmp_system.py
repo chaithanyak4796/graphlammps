@@ -5,9 +5,7 @@
 import numpy as np
 import random
 import sys
-
-# from graphlammps import create, atom
-# from graphlammps.params import mass_C, mass_O, mass_N, kb, NA
+from typing import List
 
 class lmp_system:
     """
@@ -36,18 +34,16 @@ class lmp_system:
         self.num_atoms = len(self.atoms_list)
         self.get_num_atom_types()
 
-    def get_atom_idx(self, idx):
+    def get_atom_idx(self, idx: int):
         if idx in self.idx_map:
             return self.idx_map[idx]
         else:
             raise Exception(f'Error in system.get_atom_idx(); No atom index with {idx} found.')
     
-    def get_atom(self, idx):
+    def get_atom(self, idx : int):
         return self.atoms_list[self.get_atom_idx(idx)]
-            
-    ###### Old ################
-    def get_atom_old(self, idx):
-        for at in self.atoms_list:
-            if(at.idx == idx):
-                return at
-        sys.exit(f"Atom with atom id {idx} not found in the atoms_list.")
+    
+    
+    def remove_atoms(self, idx : List[int]):
+        for i in sorted(idx, reverse=True):
+            self.atoms_list.pop(i)

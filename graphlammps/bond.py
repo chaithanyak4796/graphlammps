@@ -89,7 +89,14 @@ class bonds:
                                 break
                             else:
                                 natoms += 1
+                        # One peculiar thing with reaxff/bonds is that if new atoms are introduced at a particular timestep, 
+                        # there will be two records of the bonds info at that timestep: one before and one after the introduction of the new atoms.
+                        # To combat this, I add a check here to ensure the timestep is unique
+
                         self.line_offset.append([ts, offset_beg, natoms])
+                        if(len(self.line_offset) > 1 and (self.line_offset[-1][0] == self.line_offset[-2][0])):
+                            _ = self.line_offset.pop(-2)
+
                     else:
                         sys.exit(f" Error while mapping the bonds file : {self.fname}\n Timestep not found at the expected location in the bonds file. !!!!!\n Check near timestep {ts}\n {line}")
         
@@ -109,9 +116,10 @@ class bonds:
         self.num_timesteps = len(self.line_offset)
         
     def read_bonds_timestep(self, step):
+        """ This function reads the bonds info at a given time step. """
         
         # Check if the step is valid
-        idx = np.where(self.line_offset[:,0] == step)[0]
+        idx = np.where(self.line_offset[:,0] == step)[0]   
         
         if (len(idx) == 0):
             sys.exit(f"Time step {step} not found in bonds file.")

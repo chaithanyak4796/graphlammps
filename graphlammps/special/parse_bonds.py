@@ -181,3 +181,24 @@ class parse_bonds():
         #     print(name, " : ", len(mols_count[name]))
         
         return mols_count
+    
+    def print_count(self, count):
+        """ Print the count of the molecules """
+        print(" ")
+        for mech in count:
+            print(mech, len(count[mech]))
+        print(" ")
+        
+    def get_molecule(self, count, idx):
+        """ Return the molecule object which contains the atom """
+        for mech in count:
+            for mol in count[mech]:
+                if (idx in mol.atom_id):
+                    return mol
+        
+        mol = molecule.molecule(name='None')
+        if(self.bonds.get_bond(idx).type not in self.O_type):   
+            print("Given atom is not an O atom.")
+        else:
+            print(" Atom not found in any molecule")
+        return mol
