@@ -48,10 +48,10 @@ class bonds:
             cache_bonds_fname = self.fname + ".cache" 
             cache_exist       = os.path.isfile(cache_bonds_fname)
             
-            if not cache_exist:
+            if not cache_exist:    # Cache does not exist
                 write_cache = True
                 if(self.warn_cache): print("Bonds cache does not exist. Will write new cache.")
-            else:
+            else:                  # Cache exists. Check if it is up to date
                 write_cache = False
                 fc = open(cache_bonds_fname, "r+")
                 file_fname = fc.readline()
@@ -70,7 +70,7 @@ class bonds:
                         self.line_offset.append([int(line[0]), int(line[1]), int(line[2])])
                 fc.close()
             
-        if ((self.use_cache == False) or (self.use_cache and write_cache)):       
+        if ((self.use_cache == False) or (self.use_cache and write_cache)):   # Prepare new line offset array
             with open(self.fname) as fr:
                 for line in fr:
                     offset_beg = offset
@@ -89,7 +89,14 @@ class bonds:
                                 break
                             else:
                                 natoms += 1
+                        # One peculiar thing with reaxff/bonds is that if new atoms are introduced at a particular timestep, 
+                        # there will be two records of the bonds info at that timestep: one before and one after the introduction of the new atoms.
+                        # To combat this, I add a check here to ensure the timestep is unique
+
                         self.line_offset.append([ts, offset_beg, natoms])
+                        if(len(self.line_offset) > 1 and (self.line_offset[-1][0] == self.line_offset[-2][0])):
+                            _ = self.line_offset.pop(-2)
+
                     else:
                         sys.exit(f" Error while mapping the bonds file : {self.fname}\n Timestep not found at the expected location in the bonds file. !!!!!\n Check near timestep {ts}\n {line}")
         
@@ -109,9 +116,10 @@ class bonds:
         self.num_timesteps = len(self.line_offset)
         
     def read_bonds_timestep(self, step):
+        """ This function reads the bonds info at a given time step. """
         
         # Check if the step is valid
-        idx = np.where(self.line_offset[:,0] == step)[0]
+        idx = np.where(self.line_offset[:,0] == step)[0]   
         
         if (len(idx) == 0):
             sys.exit(f"Time step {step} not found in bonds file.")
@@ -144,7 +152,8 @@ class bonds:
             for _ in range(4): 
                 line = self.fr.readline()
             
-            self.bonds_list = []
+            self.bonds_list = []    # List of all the bond_info instances
+            self.idx_map = {}       # Dictionary to map the atom_id to the index in the list
             
             for i in range(self.num_atoms):
                 bond = bond_info()
@@ -166,11 +175,12 @@ class bonds:
                 bond.q      = float(line[-1])
                 
                 self.bonds_list.append(bond)
+                self.idx_map[bond.id] = i
                 
             line = self.fr.readline()
             
             # Sort the bonds list based on the id attribute
-            self.bonds_list.sort(key=lambda x: x.id)
+            #self.bonds_list.sort(key=lambda x: x.id)
             
     def read_next_timestep(self):
         ts_curr = self.timestep
@@ -204,18 +214,42 @@ class bonds:
         
         # print("%d O2 molecules found at timestep %d"%(len(O2_idx), self.timestep))
         return O2_idx
-
+        
+    def get_bond_idx(self, idx):
+        """ In some cases the bonds_list[idx].id will not equal idx+1
+            In those cases, use this function to get i where bonds_list[i] == idx"""
+        if idx in self.idx_map:
+            return self.idx_map[idx]
+        else:
+            raise Exception('Error in get_bond_idx(): No bond with id==idx found.')
+    
+    def get_bond(self, idx):
+        """ Return the bond_info instance given the bond index"""
+        return(self.bonds_list[self.get_bond_idx(idx)])
+            
     def get_neighbor_info(self, idx):
+        """ Update the atom types of the neighboring atoms"""
+        list_idx = self.get_bond_idx(idx)
+        
+        self.bonds_list[list_idx].type_nb = []
+        for i in self.bonds_list[list_idx].id_nb:
+            j = self.get_bond_idx(i)
+            self.bonds_list[list_idx].type_nb.append(self.bonds_list[j].type)
+ 
+    ########## Old ########################
+    
+    def get_neighbor_info_old(self, idx):
         """ Update the idenities of the neighboring atoms"""
         self.bonds_list[idx].type_nb = []
         for i in self.bonds_list[idx].id_nb:
-            j = self.get_bond(i)
+            j = self.get_bond_index(i)
             self.bonds_list[idx].type_nb.append(self.bonds_list[j].type)
 
-    def get_bond(self, idx):
+    def get_bond_old(self, idx):
         """ In some cases the bonds_list[idx].id will not equal idx+1
             In those cases, use this function to get i where bonds_list[i] == idx"""
         for i in range(len(self.bonds_list)):
             if(self.bonds_list[i].id == idx):
                 return i
         sys.exit('Error in get_bond(): No bond with id==idx found.')
+    
