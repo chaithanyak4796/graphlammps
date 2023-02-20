@@ -244,7 +244,7 @@ class create:
         system.num_atom_types = atom_type
         
         # Write the structure files
-        self.write_struc(system)
+        # self.write_struc(system)
     
         return system
     

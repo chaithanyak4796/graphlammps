@@ -15,3 +15,5 @@ gm_mol2kg   = 1E-3/NA
 Angs_fs2m_s = 1E5
 Angs_ps2m_s = 1E2
 eV2J        = 1.60218E-19
+
+kb_eV = kb/eV2J
