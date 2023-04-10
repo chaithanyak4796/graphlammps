@@ -1,0 +1,7 @@
+VARIABLES = "T<sub>gas</sub> [K]", "<greek>g</greek><sub>ER</sub>", "<greek>s</greek><sub>ER</sub>", "<greek>g</greek><sub>ER-long</sub>", "<greek>s</greek><sub>ER-long</sub>", "<greek>g</greek><sub>oxy</sub>", "<greek>s</greek><sub>oxy</sub>", "<greek>g</greek><sub>ads</sub>", "<greek>s</greek><sub>ads</sub>" 
+ZONE T="Data", I=5, F=POINT
+1000.00 1.6191E-05 1.0881E-05 1.8170E-05 6.4005E-06 8.0032E-03 5.4993E-04 5.6242E-02 3.7084E-03 
+1200.00 6.0914E-05 2.9806E-05 6.9838E-05 1.8921E-05 1.1190E-02 8.1596E-04 5.7448E-02 3.5590E-03 
+1500.00 1.4615E-04 5.6591E-05 1.7093E-04 3.0636E-05 1.1076E-02 8.0517E-04 6.8065E-02 3.9712E-03 
+1800.00 1.7250E-04 2.8149E-05 3.0354E-04 4.2506E-05 1.4633E-02 1.4761E-03 7.2269E-02 4.4227E-03 
+2000.00 3.3307E-04 8.7431E-05 3.7362E-04 3.6929E-05 1.5632E-02 8.3972E-04 7.4851E-02 2.7441E-03 
