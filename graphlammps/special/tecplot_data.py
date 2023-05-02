@@ -58,9 +58,12 @@ class tecplot_data:
         self.header_zone = f'ZONE T=\"{self.zone}\", I={self.num_rows}, F=POINT\n'
         
         
-    def write_data_file(self, fname='sample.dat'):
+    def write_data_file(self, fname='sample.dat', write_mode="w"):
         self.fname = fname
-        with open(self.fname, "w") as ftec:
+        if (write_mode != "w" and write_mode != "a"):
+            print("Warning: Invalid write mode. Rewriting the file")
+            write_mode = "w"
+        with open(self.fname, write_mode) as ftec:
             ftec.write(self.header_var)
             ftec.write(self.header_zone)
             
